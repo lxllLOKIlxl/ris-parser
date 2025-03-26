@@ -89,11 +89,8 @@ def convert(ris_text):
     volume = "N/A"
     sp = "N/A"
     doi = "N/A"
-    date = "N/A"
-    keywords = []
-    abstract = "N/A"
     AU = []
-    
+
     for line in ris_text.splitlines():
         parts = line.split("  - ")
         if len(parts) < 2:
@@ -111,27 +108,10 @@ def convert(ris_text):
             sp = value
         elif key == "DO":
             doi = value
-        elif key == "DA":
-            date = value
-        elif key == "KW":
-            keywords.append(value)
-        elif key == "AB":
-            abstract = value
         elif key == "AU":
             AU.append(f(value))
 
-    return f"""
-    Authors: {', '.join(AU)}
-    Title: {title}
-    Journal: {journal}
-    Year: {year}
-    Volume: {volume}
-    Pages: {sp}
-    DOI: {doi}
-    Date: {date}
-    Keywords: {', '.join(keywords)}
-    Abstract: {abstract}
-    """
+    return f"{', '.join(AU)} {title}. // {journal}. {year}. {volume}. {sp}. DOI: {doi}"
 
 from pyscript import document
 def display_text(*args):
