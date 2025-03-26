@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved RIS Parser</title>
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
+        h1 {
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 90%;
+            height: 150px;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #bbb;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output-text {
+            width: 90%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>RIS Parser</h1>
+    <textarea id="input-text" placeholder="Paste your RIS-formatted text here"></textarea>
+    <button py-click="display_text">Parse RIS Text</button>
+    <p id="output-text"></p>
+
+    <script type="py">
+def f(au):
+    r = au.split(", ")
+    if len(r) == 2:
+        return f"{r[0]} {r[1][0]}."
+    return r[0]
+
+def validate_tags(ris_text):
+    required_tags = ["T1", "JO", "PY", "VL", "SP", "DO", "AU"]
+    missing_tags = [tag for tag in required_tags if not any(line.startswith(tag) for line in ris_text.splitlines())]
+    return missing_tags
+
+def convert(ris_text):
+    title = ""
+    journal = ""
+    year = ""
+    volume = ""
+    sp = ""
+    doi = ""
+    AU = []
+    
+    for line in ris_text.splitlines():
+        parts = line.split("  - ")
+        if len(parts) < 2:
+            continue
+        key, value = parts[0], parts[1].strip()
+        if key == "T1":
+            title = value
+        elif key == "JO":
+            journal = value
+        elif key == "PY":
+            year = value
+        elif key == "VL":
+            volume = value
+        elif key == "SP":
+            sp = value
+        elif key == "DO":
+            doi = value
+        elif key == "AU":
+            AU.append(f(value))
+
+    return f"{', '.join(AU)} {title}. // {journal}. {year}. {volume}. {sp}. DOI: {doi}"
+
+from pyscript import document
+def display_text(*args):
+    input_text = document.getElementById("input-text").value
+    output_element = document.getElementById("output-text")
+    
+    missing_tags = validate_tags(input_text)
+    if missing_tags:
+        output_element.innerHTML = f"<span class='error'>Error: Missing tags: {', '.join(missing_tags)}</span>"
+        return
+    
+    output_element.innerText = convert(input_text)
+    </script>
+</body>
+</html>
