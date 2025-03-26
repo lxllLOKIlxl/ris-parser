@@ -7,7 +7,7 @@
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f3f4f6;
             margin: 0;
             padding: 20px;
@@ -77,52 +77,70 @@ def f(au):
         return f"{r[0]} {r[1][0]}."
     return r[0]
 
-def validate_tags(ris_text):
-    required_tags = ["T1", "JO", "PY", "VL", "SP", "DO", "AU"]
-    missing_tags = [tag for tag in required_tags if not any(line.startswith(tag) for line in ris_text.splitlines())]
-    return missing_tags
-
 def convert(ris_text):
-    title = "N/A"
-    journal = "N/A"
-    year = "N/A"
-    volume = "N/A"
-    sp = "N/A"
-    doi = "N/A"
-    AU = []
-
+    # Ініціалізація даних з налаштуванням значень "N/A"
+    data = {
+        "title": "N/A",
+        "journal": "N/A",
+        "year": "N/A",
+        "volume": "N/A",
+        "pages": "N/A",
+        "doi": "N/A",
+        "date": "N/A",
+        "authors": [],
+        "keywords": [],
+        "abstract": "N/A",
+    }
+    
     for line in ris_text.splitlines():
         parts = line.split("  - ")
         if len(parts) < 2:
             continue
         key, value = parts[0], parts[1].strip()
         if key == "T1":
-            title = value
+            data["title"] = value
         elif key == "JO":
-            journal = value
+            data["journal"] = value
         elif key == "PY":
-            year = value
+            data["year"] = value
         elif key == "VL":
-            volume = value
+            data["volume"] = value
         elif key == "SP":
-            sp = value
+            data["pages"] = value
         elif key == "DO":
-            doi = value
+            data["doi"] = value
+        elif key == "DA":
+            data["date"] = value
+        elif key == "KW":
+            data["keywords"].append(value)
+        elif key == "AB":
+            data["abstract"] = value
         elif key == "AU":
-            AU.append(f(value))
+            data["authors"].append(f(value))
 
-    return f"{', '.join(AU)} {title}. // {journal}. {year}. {volume}. {sp}. DOI: {doi}"
+    # Форматований вивід
+    return f"""
+    Authors: {', '.join(data['authors'])}
+    Title: {data['title']}
+    Journal: {data['journal']}
+    Year: {data['year']}
+    Volume: {data['volume']}
+    Pages: {data['pages']}
+    DOI: {data['doi']}
+    Date: {data['date']}
+    Keywords: {', '.join(data['keywords'])}
+    Abstract: {data['abstract']}
+    """
 
 from pyscript import document
 def display_text(*args):
     input_text = document.getElementById("input-text").value
     output_element = document.getElementById("output-text")
     
-    missing_tags = validate_tags(input_text)
-    if missing_tags:
-        output_element.innerHTML = f"<span class='error'>Error: Missing tags: {', '.join(missing_tags)}</span>"
+    if not input_text.strip():
+        output_element.innerHTML = "<span class='error'>Error: Input text is empty</span>"
         return
-    
+
     output_element.innerText = convert(input_text)
     </script>
 </body>
