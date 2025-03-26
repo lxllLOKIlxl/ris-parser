@@ -83,12 +83,12 @@ def validate_tags(ris_text):
     return missing_tags
 
 def convert(ris_text):
-    title = ""
-    journal = ""
-    year = ""
-    volume = ""
-    sp = ""
-    doi = ""
+    title = "N/A"
+    journal = "N/A"
+    year = "N/A"
+    volume = "N/A"
+    sp = "N/A"
+    doi = "N/A"
     AU = []
     
     for line in ris_text.splitlines():
