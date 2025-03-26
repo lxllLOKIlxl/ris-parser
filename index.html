@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Improved RIS Parser</title>
+    <title>Enhanced RIS Parser</title>
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
         body {
@@ -65,7 +65,7 @@
     </style>
 </head>
 <body>
-    <h1>RIS Parser</h1>
+    <h1>Enhanced RIS Parser</h1>
     <textarea id="input-text" placeholder="Paste your RIS-formatted text here"></textarea>
     <button py-click="display_text">Parse RIS Text</button>
     <p id="output-text"></p>
@@ -89,6 +89,9 @@ def convert(ris_text):
     volume = "N/A"
     sp = "N/A"
     doi = "N/A"
+    date = "N/A"
+    keywords = []
+    abstract = "N/A"
     AU = []
     
     for line in ris_text.splitlines():
@@ -108,10 +111,27 @@ def convert(ris_text):
             sp = value
         elif key == "DO":
             doi = value
+        elif key == "DA":
+            date = value
+        elif key == "KW":
+            keywords.append(value)
+        elif key == "AB":
+            abstract = value
         elif key == "AU":
             AU.append(f(value))
 
-    return f"{', '.join(AU)} {title}. // {journal}. {year}. {volume}. {sp}. DOI: {doi}"
+    return f"""
+    Authors: {', '.join(AU)}
+    Title: {title}
+    Journal: {journal}
+    Year: {year}
+    Volume: {volume}
+    Pages: {sp}
+    DOI: {doi}
+    Date: {date}
+    Keywords: {', '.join(keywords)}
+    Abstract: {abstract}
+    """
 
 from pyscript import document
 def display_text(*args):
